@@ -178,7 +178,6 @@ public class SampleLoginModule implements LoginModule {
         boolean passwordCorrect = false;
         
         PasswordStore pstore = PasswordStore.getInstance();
-        password = pstore.getPassword(username);
         
         usernameCorrect = pstore.validateUsername(username);
         if (usernameCorrect) {

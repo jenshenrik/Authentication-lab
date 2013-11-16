@@ -54,11 +54,13 @@ public class PasswordStore {
 		// split pwd string
 		String[] user = pwdLine.split(":");
 		String pwd = user[1];
-		String hash = user[2];
+		String salt = user[2];
 		
 		// test pwd
-		
-		// return result
+		return testPassword(password, pwd, salt);
+	}
+	
+	private boolean testPassword(String entered, String stored, String salt) {
 		
 		return true;
 	}
