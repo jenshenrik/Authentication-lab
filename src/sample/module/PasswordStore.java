@@ -49,7 +49,7 @@ public class PasswordStore {
 	public boolean validateUsername(String username) {
 		return passwords.containsKey(username);
 	}
-	
+
 	public boolean validatePassword(String username, String password) {
 		String pwdLine = passwords.get(username);
 		// return false if username not found
@@ -60,20 +60,22 @@ public class PasswordStore {
 		String[] user = pwdLine.split(":");
 		String pwd = user[0];
 		String salt = user[1];
-		
 		// test pwd
 		return testPassword(password, pwd, salt);
-		//return true;
 	}
 	
 	private boolean testPassword(String entered, String stored, String salt) {
 		try {
-			return stored.equals(encrypt(entered, salt));
+			String encrypted = encrypt(entered, salt);
+			return stored.equals(encrypted);
 		} catch (NoSuchAlgorithmException ex) {
-			return false;
+			ex.printStackTrace();
+			System.exit(0);
 		}
+		return false;
 	}
 	
+	@SuppressWarnings("unused")
 	private String generateSalt() throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
 		byte[] salt = new byte[8];
@@ -101,7 +103,6 @@ public class PasswordStore {
 		System.out.println("Testing user 'test'...");
 		System.out.println("password: 'qwer'");
 		System.out.println("Result:");
-		System.out.println(pstore.validatePassword("test", "qwer"));
+		System.out.println(pstore.validatePassword("test", "asdf"));
 	}
-	
 }

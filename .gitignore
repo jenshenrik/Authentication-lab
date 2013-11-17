@@ -1,2 +1,6 @@
 bin/*
 /bin
+
+doc/*.pdf
+doc/*.aux
+doc/*.log

@@ -177,15 +177,19 @@ public class SampleLoginModule implements LoginModule {
         boolean passwordCorrect = false;
         
         PasswordStore pstore = PasswordStore.getInstance();
-        
-        usernameCorrect = pstore.validateUsername(username);
-        if (usernameCorrect) {
-            // user verified, verify passwd
-            passwordCorrect = pstore.validatePassword(username, password.toString());
+        if (pstore.validateUsername(username)) {
+            usernameCorrect = true;
+        }
+//        System.out.println(new String(password));
+        if (usernameCorrect && pstore.validatePassword(username, new String(password))) {
+
+            // authentication succeeded!!!
+            passwordCorrect = true;
             if (debug)
                 System.out.println("\t\t[SampleLoginModule] " +
                                 "authentication succeeded");
-            succeeded = passwordCorrect;
+            succeeded = true;
+            return true;
         } else {
 
             // authentication failed -- clean out state
@@ -203,7 +207,6 @@ public class SampleLoginModule implements LoginModule {
                 throw new FailedLoginException("Password Incorrect");
             }
         }
-        return succeeded;
     }
 
     /**
