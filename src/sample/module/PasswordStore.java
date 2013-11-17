@@ -1,11 +1,16 @@
 package sample.module;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 public class PasswordStore {
 	
@@ -37,7 +42,7 @@ public class PasswordStore {
 				Charset.defaultCharset());
 		for (int i = 0; i < lines.size(); i++) {
 			String[] user = lines.get(i).split(":");
-			passwords.put(user[0], user[1]);
+			passwords.put(user[0], user[1] + ":" + user[2]);
 		}
 	}
 	
@@ -53,21 +58,50 @@ public class PasswordStore {
 		
 		// split pwd string
 		String[] user = pwdLine.split(":");
-		String pwd = user[1];
-		String salt = user[2];
+		String pwd = user[0];
+		String salt = user[1];
 		
 		// test pwd
 		return testPassword(password, pwd, salt);
+		//return true;
 	}
 	
 	private boolean testPassword(String entered, String stored, String salt) {
-		
-		return true;
+		try {
+			return stored.equals(encrypt(entered, salt));
+		} catch (NoSuchAlgorithmException ex) {
+			return false;
+		}
 	}
 	
-	/*
-	public static void main(String[] args) {
-		PasswordStore pstore = PasswordStore.getInstance();
+	private String generateSalt() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+		byte[] salt = new byte[8];
+		sr.nextBytes(salt);
+		return new String(salt, "UTF-8");
 	}
-	*/
+	
+	private String encrypt(String password, String salt) throws NoSuchAlgorithmException {
+		String msg = password + salt;
+		return md5(msg);
+	}
+	
+	private String md5(String input) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("MD5");
+        digest.update(input.getBytes(), 0, input.length());
+        String md5 = new BigInteger(1, digest.digest()).toString(16);
+        return md5;
+    }
+	
+	public static void main(String[] args) throws Exception {
+		PasswordStore pstore = PasswordStore.getInstance();
+		String salt = pstore.generateSalt();
+		String digest = pstore.encrypt("asdf", salt);
+		System.out.println(digest + ":" + salt);
+		System.out.println("Testing user 'test'...");
+		System.out.println("password: 'qwer'");
+		System.out.println("Result:");
+		System.out.println(pstore.validatePassword("test", "qwer"));
+	}
+	
 }

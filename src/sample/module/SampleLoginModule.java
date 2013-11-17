@@ -172,7 +172,6 @@ public class SampleLoginModule implements LoginModule {
             System.out.println();
         }
 
-        // TODO: Use PasswordStore instead
         // verify the username/password
         boolean usernameCorrect = false;
         boolean passwordCorrect = false;
@@ -181,13 +180,12 @@ public class SampleLoginModule implements LoginModule {
         
         usernameCorrect = pstore.validateUsername(username);
         if (usernameCorrect) {
-            // authentication succeeded!!!
-            passwordCorrect = true;
+            // user verified, verify passwd
+            passwordCorrect = pstore.validatePassword(username, password.toString());
             if (debug)
                 System.out.println("\t\t[SampleLoginModule] " +
                                 "authentication succeeded");
-            succeeded = true;
-            return true;
+            succeeded = passwordCorrect;
         } else {
 
             // authentication failed -- clean out state
@@ -205,6 +203,7 @@ public class SampleLoginModule implements LoginModule {
                 throw new FailedLoginException("Password Incorrect");
             }
         }
+        return succeeded;
     }
 
     /**
