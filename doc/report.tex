@@ -41,8 +41,45 @@
 \newpage
 
 \section{Task 1}
+JAAS uses a number of models when authenticating users.
+The primary ones use for authentication are
 
-\section{Task 2}
+\begin{itemize*}
+	\item \textbf{Principals} are representations of identities.
+		These are entities that need to access resources in some way,
+		and can be anything from users to threads.
+	\item \textbf{Subjects} are sets of credentials identifying a \textbf{Principal}.
+	\item \textbf{Login contexts} are the top level objects, which abstracts most of
+		the authentication process. This is what a program interacts with when 
+		authenticating users.
+	\item \textbf{Login modules} are what is under the hood of the \textbf{login context}.
+		These are the objects that handle the actual authentication of the users.
+		As these adhere to specific interfaces, a \textbf{login module} can use several 
+		different authentication methods, which are then abstracted away from the consuming
+		program by the \textbf{login context}.
+	\item \textbf{Callback handlers} which handles communication with users. These are
+		also implementations of a specific interface, which allow for many different forms
+		of communications for each \textbf{login module}.
+\end{itemize*}
+
+In order to authenticate users using JAAS, a program needs a \texttt{LoginContext}.
+When such a context is created, it is supplied with an underlying \texttt{LoginModule},
+which handles the actual authentication, and a \texttt{CallBackHandler}.
+The login module uses this callback handler to communicate with the user,
+primarily promting the user for username and password.
+This separation provides a desirable level of modularity, as a single login module
+can then communicate with users in several ways, and vice versa.
+
+In this specific program, \texttt{SampleAcn} creates a login context using
+\texttt{Sample\-Login\-Module} as the underlying implementation, and \texttt{MyCallbackHandler}
+as the callback handler.
+When the program is run, the login context's \texttt{login} method is called.
+This then causes the login module to prompt the user for a username and password
+through the callback handler.
+Once these informations are entered, the login module verifies them using whatever
+method is implemented.
+If the credentials cannot be authenticated, an exception is throws.
+As the program does not actually do anything, no principals are created.
 
 \section{Task 3}
 \emph{Please note that this implementation uses Java's `New IO` (\emph{\texttt{java.nio}}) 
@@ -61,7 +98,7 @@ This line consists of a username, an (encrypted) password, and a salt, each sepa
 Since the salt and username does not disclose any information on the password, 
 these are stored in clear text.
 
-The primary extensions done to this program is in \texttt{sample.module.PasswordStore}.
+The primary extensions done to this program is in \texttt{sample.module.\-Password\-Store}.
 This class is a singleton, which handles the actual authentication.
 Usernames are verified through a call to the method \texttt{validateUsername}.
 Once a username is validated, the password is next.
@@ -113,6 +150,16 @@ arguments.
 
 Please note that these files are intend for use on a machine running the Debian OS.
 No garanties are made, that they will work on other OSs.
+
+\subsection{Generating new users}
+The included password file contains a single user, with the username
+\texttt{test} and password \texttt{asdf}.
+Should one wish to create a new user, an encypted password can be
+generated using the \texttt{main} method of the \texttt{PasswordStore}.
+Simply swap the first argument in the call to \texttt{encrypt} to whatever
+the desired password should be, and run the program.
+This will output the encrypted password concatenated with \texttt{:<salt>}
+to the console, which can then be copy-pasted into the file along with the username.
 
 \newpage
 \appendix

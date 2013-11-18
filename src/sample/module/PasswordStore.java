@@ -100,9 +100,5 @@ public class PasswordStore {
 		String salt = pstore.generateSalt();
 		String digest = pstore.encrypt("asdf", salt);
 		System.out.println(digest + ":" + salt);
-		System.out.println("Testing user 'test'...");
-		System.out.println("password: 'qwer'");
-		System.out.println("Result:");
-		System.out.println(pstore.validatePassword("test", "asdf"));
 	}
 }
