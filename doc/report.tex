@@ -1,0 +1,151 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{lipsum}
+\usepackage{listings}
+\usepackage{mdwlist}
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{Technical University of Denmark}
+\fancyhead[L]{02239 -- Data security}
+\fancyfoot[R]{\thepage}
+\fancyfoot[L]{s070145 -- Jens Henrik Skuldbøl}
+
+\newcommand\Q[1]{
+	\leavevmode\par
+	\noindent
+	\emph{Q -- #1}
+	\\
+}
+
+\newcommand\A[1]{
+	A -- #1
+}
+
+\title{Authentication Lab}
+\author{Jens Henrik Skuldbøl, s070145}
+\date{November 18th, 2013}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{quote}
+	The implemented solutions in this assignment were discussed
+	with Brian Lynnerup Pedersen, s042457, during development.
+\end{quote}
+
+\newpage
+
+\section{Task 1}
+
+\section{Task 2}
+
+\section{Task 3}
+\emph{Please note that this implementation uses Java's `New IO` (\emph{\texttt{java.nio}}) 
+and therefor required Java 7 to run.}
+
+The basic architecture of this extension is as follows.
+A singleton class maintains a store of <username, password> pairs, read from a file.
+Whenever an authentication is attempted, the store is updated.
+The first step in an authentication is to check whether the username exists.
+If this is the case, the program then encrypts the entered password, concateneted
+with the salt of the user, and the resulting string is compared to the stored password value.
+If the two match, the user has entered the correct password, and is authenticated.
+
+The structure of the password file is a single line prr user.
+This line consists of a username, an (encrypted) password, and a salt, each separated by a semi-colon.
+Since the salt and username does not disclose any information on the password, 
+these are stored in clear text.
+
+The primary extensions done to this program is in \texttt{sample.module.PasswordStore}.
+This class is a singleton, which handles the actual authentication.
+Usernames are verified through a call to the method \texttt{validateUsername}.
+Once a username is validated, the password is next.
+This is validated through a call to \texttt{validatePassword}.
+This method then compares the passwords by calling \texttt{testPassword},
+which simply returns the result of an equality check of the stored and entered password,
+the latter after being encrypted.
+The encryption is handled by the \texttt{encrypt} method, which is simply a wrapper around 
+the \texttt{md5} method, concatenating password and salt before hashing it.
+
+The use of a message digest, in this case MD5, ensures confidentiality.
+Even if an intruder would ever gain access to the password file, the passwords
+are not compromised, as the encryption is not reversible.
+
+If an intruder ever did get his hans on a password file, however, he would still be able
+to tamper with the file, thereby denying athentic users access to their resources, by
+altering the encrypted passwords, or simply deleting users.
+A way to safeguard against this would be to restrict access to the file.
+Making the file read-only would ensure that no one ever tampers with anything,
+but this would have several downsides. Some of these downsides would be that users are unable
+to change their passwords. As passwords are not recoverable, users who forgets their
+password are then excluded from accessing the system, unless they somehow remembers their password.
+Another downside is the lacking support for adding new users.
+
+A way to circumvent these downsides could be to encrypt the password to ensure
+authenticity of the author, such as through a asymmetric keypair. 
+This could be done by either a trusted, third party, or by
+the user him self. While this would not prevent a malicious intruder from destroying the file,
+it would allow for easy detection were this the case.
+Implementation of this has been considered to be beyond the scope of this excercise.
+
+As the confidentiality of the passwords are ensured, as stated above,
+availability is easily obtained by simply making the file readable by everyone.
+This would, however, expose a list of usernames to potentially malicious users,
+so administrators would have to strike a balance of making the file available
+to relevant users, while unavailable to the outside world.
+On top of this, it is also bad practise to inform a user of whether a username is correct
+on a failed authentication, but as this was the basis of the solution, it has not been removed.
+It also serves a debugging purpose in this case.
+
+\section{Running the program}
+Included in the handin are two shell files, \texttt{run.sh} and \texttt{build.sh}.
+Their function should be fairly obvious from their names.
+Though the binaries should be included, \texttt{build.sh} has been included in case
+the program should need to be rebuilt.
+
+\texttt{run.sh} runs the program, passing the commands listed in the exercise as
+arguments.
+
+Please note that these files are intend for use on a machine running the Debian OS.
+No garanties are made, that they will work on other OSs.
+
+\newpage
+\appendix
+
+\section{Code}
+
+\subsection{Task 3}
+
+\subsubsection{SampleLoginModule}
+\label{code:sampleloginmodule}
+This section contains the changed code from the \texttt{SampleLoginModule} class.
+\lstinputlisting
+[
+	basicstyle=\footnotesize,
+	numbers=left,
+	numberstyle=\tiny,
+	breaklines=true,
+	language=Java,
+	firstline=175,
+	lastline=192
+]
+{../src/sample/module/SampleLoginModule.java}
+
+\subsubsection{PasswordStore}
+\label{code:passwordstore}
+This is the complete source code for the \texttt{PasswordStore} class.
+\lstinputlisting
+[
+	basicstyle=\footnotesize,
+	numbers=left,
+	numberstyle=\tiny,
+	breaklines=true,
+	language=Java
+]
+{../src/sample/module/PasswordStore.java}
+\end{document}
